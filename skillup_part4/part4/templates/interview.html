@@ -1,0 +1,4426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Skill Up AI - Mock Interview</title>
+
+
+    <!-- =====================================================
+         MAIN CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('part4.static', filename='part4.css') }}"
+    >
+
+
+    <!-- =====================================================
+         MEDIAPIPE FACE DETECTION
+    ====================================================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+</head>
+
+
+<body class="interview-page interview-only">
+
+
+<!-- =====================================================
+     TOP HEADER
+===================================================== -->
+
+<header class="interview-header">
+
+
+    <!-- COMPLETE SKILL UP AI LOGO -->
+
+    <div class="brand">
+
+        <img
+            src="{{ url_for('part4.static', filename='logo.png') }}"
+            alt="Skill Up AI"
+        >
+
+    </div>
+
+
+    <!-- TITLE -->
+
+    <div class="interview-title">
+
+        AI MOCK INTERVIEW
+
+    </div>
+
+
+    <!-- QUESTION COUNTER -->
+
+    <div
+        class="question-counter"
+        id="questionCounter"
+    >
+
+        QUESTION 0 / 8
+
+    </div>
+
+
+</header>
+
+
+
+<!-- =====================================================
+     MAIN INTERVIEW AREA
+===================================================== -->
+
+<main class="interview-main">
+
+
+    <!-- =================================================
+         LEFT SIDE
+    ================================================== -->
+
+    <section class="interview-question-section">
+
+
+        <!-- LIVE STATUS -->
+
+        <div class="live-indicator">
+
+            <span class="live-dot"></span>
+
+            LIVE INTERVIEW
+
+        </div>
+
+
+        <!-- QUESTION PROGRESS -->
+
+        <div
+            class="question-progress"
+            id="questionProgress"
+        ></div>
+
+
+        <!-- QUESTION CARD -->
+
+        <div class="question-card">
+
+
+            <div class="question-label">
+
+                CURRENT QUESTION
+
+            </div>
+
+
+            <h1 id="questionText">
+
+                Preparing your interview...
+
+            </h1>
+
+
+            <!-- =================================================
+                 MANUAL SPEAK QUESTION
+            ================================================== -->
+
+            <button
+                type="button"
+                id="speakQuestionBtn"
+                class="speak-question-btn"
+            >
+
+                🔊 Speak Question
+
+            </button>
+
+
+            <p class="speak-note">
+
+                Click this button whenever you want the
+                AI interviewer to read the question aloud.
+
+            </p>
+
+
+            <!-- =================================================
+                 ANSWER
+            ================================================== -->
+
+            <textarea
+                id="answerInput"
+                rows="8"
+                placeholder="Type your answer here or use Speak Answer..."
+            ></textarea>
+
+
+            <!-- ANSWER BUTTONS -->
+
+            <div class="answer-buttons">
+
+
+                <button
+                    type="button"
+                    id="voiceAnswerBtn"
+                    class="voice-answer-btn"
+                >
+
+                    🎤 Speak Answer
+
+                </button>
+
+
+                <button
+                    type="button"
+                    id="nextQuestionBtn"
+                    class="next-question-btn"
+                >
+
+                    Next Question →
+
+                </button>
+
+
+            </div>
+
+
+            <!-- EVALUATION -->
+
+            <div
+                id="evaluationMessage"
+                class="evaluation-message"
+            ></div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         RIGHT SIDE
+    ================================================== -->
+
+    <aside class="interview-media-section">
+
+
+        <!-- =================================================
+             CAMERA
+        ================================================== -->
+
+        <div class="camera-card">
+
+
+            <video
+                id="cameraVideo"
+                autoplay
+                muted
+                playsinline
+            ></video>
+
+
+            <div class="camera-label">
+
+                <span class="camera-dot"></span>
+
+                CAMERA LIVE
+
+            </div>
+
+
+            <!-- Hidden canvas for face processing -->
+
+            <canvas
+                id="faceCanvas"
+                width="320"
+                height="240"
+                style="display:none;"
+            ></canvas>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             MEDIA STATUS
+        ================================================== -->
+
+        <div class="media-status-card">
+
+
+            <div class="media-status ready">
+
+                <span>✓</span>
+
+                <span>Camera</span>
+
+            </div>
+
+
+            <div class="media-status ready">
+
+                <span>✓</span>
+
+                <span>Microphone</span>
+
+            </div>
+
+
+            <div class="media-status ready">
+
+                <span>✓</span>
+
+                <span>Screen Sharing</span>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             PROCTORING
+        ================================================== -->
+
+        <div class="proctoring-card">
+
+
+            <div class="proctoring-title">
+
+                🔐 Interview Monitoring
+
+            </div>
+
+
+            <!-- LOOKING AT SCREEN -->
+
+            <div class="proctoring-item">
+
+
+                <span id="gazeStatusIcon">
+
+                    🟢
+
+                </span>
+
+
+                <span id="gazeStatusText">
+
+                    Looking at screen
+
+                </span>
+
+
+            </div>
+
+
+            <!-- TAB / WINDOW -->
+
+            <div class="proctoring-item">
+
+
+                <span id="tabStatusIcon">
+
+                    🟢
+
+                </span>
+
+
+                <span id="tabStatusText">
+
+                    Interview window active
+
+                </span>
+
+
+            </div>
+
+
+            <!-- WARNING COUNT -->
+
+            <div class="warning-count">
+
+                Red flags:
+
+                <strong id="warningCount">
+
+                    0
+
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             END INTERVIEW
+        ================================================== -->
+
+        <button
+            type="button"
+            id="endInterviewBtn"
+            class="end-interview-btn"
+        >
+
+            End Interview
+
+        </button>
+
+
+    </aside>
+
+
+</main>
+
+
+
+<!-- =====================================================
+     RED ALERT
+===================================================== -->
+
+<div
+    id="redAlert"
+    class="red-alert hidden"
+>
+
+
+    <div class="red-alert-icon">
+
+        ⚠
+
+    </div>
+
+
+    <div>
+
+
+        <strong id="alertTitle">
+
+            Warning
+
+        </strong>
+
+
+        <p id="alertMessage">
+
+            Please stay focused on the interview.
+
+        </p>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     SETUP MODAL
+===================================================== -->
+
+<div
+    id="setupModal"
+    class="setup-overlay"
+>
+
+
+    <div class="setup-card">
+
+
+        <!-- COMPLETE LOGO -->
+
+        <img
+            src="{{ url_for('part4.static', filename='logo.png') }}"
+            class="setup-logo"
+            alt="Skill Up AI"
+        >
+
+
+        <h2>
+
+            AI Mock Interview
+
+        </h2>
+
+
+        <p>
+
+            Select what you want to practice and prepare
+            your camera, microphone and screen before starting.
+
+        </p>
+
+
+
+        <!-- =================================================
+             INTERVIEW SKILL
+        ================================================== -->
+
+        <label for="roleSelect">
+
+            Interview Skill / Domain
+
+        </label>
+
+
+        <select id="roleSelect">
+
+
+            <!-- =================================================
+                 COMPUTER SCIENCE & IT
+            ================================================== -->
+
+            <optgroup label="💻 Computer Science & IT">
+
+
+                <option value="Software Development">
+
+                    Software Development
+
+                </option>
+
+
+                <option value="Programming Logic">
+
+                    Programming Logic
+
+                </option>
+
+
+                <option value="Data Structures">
+
+                    Data Structures
+
+                </option>
+
+
+                <option value="Algorithms">
+
+                    Algorithms
+
+                </option>
+
+
+                <option value="OOP">
+
+                    Object-Oriented Programming
+
+                </option>
+
+
+                <option value="DBMS">
+
+                    DBMS
+
+                </option>
+
+
+                <option value="Operating Systems">
+
+                    Operating Systems
+
+                </option>
+
+
+                <option value="Computer Networks">
+
+                    Computer Networks
+
+                </option>
+
+
+                <option value="Software Engineering">
+
+                    Software Engineering
+
+                </option>
+
+
+                <option value="Git and GitHub">
+
+                    Git / GitHub
+
+                </option>
+
+
+                <option value="Testing">
+
+                    Software Testing
+
+                </option>
+
+
+                <option value="Debugging">
+
+                    Debugging
+
+                </option>
+
+
+                <!-- PROGRAMMING LANGUAGES -->
+
+                <option value="Python">
+
+                    Python
+
+                </option>
+
+
+                <option value="Java">
+
+                    Java
+
+                </option>
+
+
+                <option value="JavaScript">
+
+                    JavaScript
+
+                </option>
+
+
+                <option value="TypeScript">
+
+                    TypeScript
+
+                </option>
+
+
+                <option value="C">
+
+                    C
+
+                </option>
+
+
+                <option value="C++">
+
+                    C++
+
+                </option>
+
+
+                <option value="C#">
+
+                    C#
+
+                </option>
+
+
+                <option value="Go">
+
+                    Go
+
+                </option>
+
+
+                <option value="Rust">
+
+                    Rust
+
+                </option>
+
+
+                <option value="Kotlin">
+
+                    Kotlin
+
+                </option>
+
+
+                <option value="Swift">
+
+                    Swift
+
+                </option>
+
+
+                <option value="Dart">
+
+                    Dart
+
+                </option>
+
+
+                <option value="PHP">
+
+                    PHP
+
+                </option>
+
+
+                <option value="Ruby">
+
+                    Ruby
+
+                </option>
+
+
+                <option value="R">
+
+                    R
+
+                </option>
+
+
+                <!-- DATABASES -->
+
+                <option value="SQL">
+
+                    SQL
+
+                </option>
+
+
+                <option value="PostgreSQL">
+
+                    PostgreSQL
+
+                </option>
+
+
+                <option value="MySQL">
+
+                    MySQL
+
+                </option>
+
+
+                <option value="MongoDB">
+
+                    MongoDB
+
+                </option>
+
+
+                <option value="Redis">
+
+                    Redis
+
+                </option>
+
+
+                <option value="SQLite">
+
+                    SQLite
+
+                </option>
+
+
+                <option value="Firebase">
+
+                    Firebase
+
+                </option>
+
+
+                <option value="Elasticsearch">
+
+                    Elasticsearch
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 WEB
+            ================================================== -->
+
+            <optgroup label="🌐 Web & Full-Stack Development">
+
+
+                <option value="HTML">
+
+                    HTML
+
+                </option>
+
+
+                <option value="CSS">
+
+                    CSS
+
+                </option>
+
+
+                <option value="React">
+
+                    React
+
+                </option>
+
+
+                <option value="Next.js">
+
+                    Next.js
+
+                </option>
+
+
+                <option value="Angular">
+
+                    Angular
+
+                </option>
+
+
+                <option value="Vue">
+
+                    Vue
+
+                </option>
+
+
+                <option value="Svelte">
+
+                    Svelte
+
+                </option>
+
+
+                <option value="Tailwind CSS">
+
+                    Tailwind CSS
+
+                </option>
+
+
+                <option value="Node.js">
+
+                    Node.js
+
+                </option>
+
+
+                <option value="Express">
+
+                    Express
+
+                </option>
+
+
+                <option value="FastAPI">
+
+                    FastAPI
+
+                </option>
+
+
+                <option value="Django">
+
+                    Django
+
+                </option>
+
+
+                <option value="Spring Boot">
+
+                    Spring Boot
+
+                </option>
+
+
+                <option value=".NET">
+
+                    .NET
+
+                </option>
+
+
+                <option value="Laravel">
+
+                    Laravel
+
+                </option>
+
+
+                <option value="MERN Stack">
+
+                    MERN Stack
+
+                </option>
+
+
+                <option value="PERN Stack">
+
+                    PERN Stack
+
+                </option>
+
+
+                <option value="Python Full Stack">
+
+                    Python Full Stack
+
+                </option>
+
+
+                <option value="Java Full Stack">
+
+                    Java Full Stack
+
+                </option>
+
+
+                <option value=".NET Full Stack">
+
+                    .NET Full Stack
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 AI / ML
+            ================================================== -->
+
+            <optgroup label="🤖 Artificial Intelligence & Machine Learning">
+
+
+                <option value="AI Fundamentals">
+
+                    AI Fundamentals
+
+                </option>
+
+
+                <option value="Machine Learning">
+
+                    Machine Learning
+
+                </option>
+
+
+                <option value="Supervised Learning">
+
+                    Supervised Learning
+
+                </option>
+
+
+                <option value="Unsupervised Learning">
+
+                    Unsupervised Learning
+
+                </option>
+
+
+                <option value="Regression">
+
+                    Regression
+
+                </option>
+
+
+                <option value="Classification">
+
+                    Classification
+
+                </option>
+
+
+                <option value="Clustering">
+
+                    Clustering
+
+                </option>
+
+
+                <option value="Feature Engineering">
+
+                    Feature Engineering
+
+                </option>
+
+
+                <option value="Model Evaluation">
+
+                    Model Evaluation
+
+                </option>
+
+
+                <option value="Deep Learning">
+
+                    Deep Learning
+
+                </option>
+
+
+                <option value="Neural Networks">
+
+                    Neural Networks
+
+                </option>
+
+
+                <option value="CNN">
+
+                    CNN
+
+                </option>
+
+
+                <option value="RNN">
+
+                    RNN
+
+                </option>
+
+
+                <option value="LSTM">
+
+                    LSTM
+
+                </option>
+
+
+                <option value="Transformers">
+
+                    Transformers
+
+                </option>
+
+
+                <option value="PyTorch">
+
+                    PyTorch
+
+                </option>
+
+
+                <option value="TensorFlow">
+
+                    TensorFlow
+
+                </option>
+
+
+                <option value="Keras">
+
+                    Keras
+
+                </option>
+
+
+                <option value="Scikit-learn">
+
+                    Scikit-learn
+
+                </option>
+
+
+                <option value="XGBoost">
+
+                    XGBoost
+
+                </option>
+
+
+                <option value="Generative AI">
+
+                    Generative AI
+
+                </option>
+
+
+                <option value="LLMs">
+
+                    Large Language Models
+
+                </option>
+
+
+                <option value="Prompt Engineering">
+
+                    Prompt Engineering
+
+                </option>
+
+
+                <option value="Embeddings">
+
+                    Embeddings
+
+                </option>
+
+
+                <option value="RAG">
+
+                    RAG
+
+                </option>
+
+
+                <option value="Vector Databases">
+
+                    Vector Databases
+
+                </option>
+
+
+                <option value="AI Agents">
+
+                    AI Agents
+
+                </option>
+
+
+                <option value="Multimodal AI">
+
+                    Multimodal AI
+
+                </option>
+
+
+                <option value="Function Calling">
+
+                    Function Calling
+
+                </option>
+
+
+                <option value="Fine-tuning">
+
+                    Fine-tuning
+
+                </option>
+
+
+                <option value="AI Model Evaluation">
+
+                    AI Model Evaluation
+
+                </option>
+
+
+                <option value="LangChain">
+
+                    LangChain
+
+                </option>
+
+
+                <option value="LlamaIndex">
+
+                    LlamaIndex
+
+                </option>
+
+
+                <option value="Hugging Face">
+
+                    Hugging Face
+
+                </option>
+
+
+                <option value="MLflow">
+
+                    MLflow
+
+                </option>
+
+
+                <option value="AI Model Serving">
+
+                    Model Serving
+
+                </option>
+
+
+                <option value="AI APIs">
+
+                    AI APIs
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 DATA
+            ================================================== -->
+
+            <optgroup label="📊 Data Science & Analytics">
+
+
+                <option value="Data Analytics">
+
+                    Data Analytics
+
+                </option>
+
+
+                <option value="Excel">
+
+                    Excel
+
+                </option>
+
+
+                <option value="Statistics">
+
+                    Statistics
+
+                </option>
+
+
+                <option value="Data Cleaning">
+
+                    Data Cleaning
+
+                </option>
+
+
+                <option value="Data Visualization">
+
+                    Data Visualization
+
+                </option>
+
+
+                <option value="Business Intelligence">
+
+                    Business Intelligence
+
+                </option>
+
+
+                <option value="Power BI">
+
+                    Power BI
+
+                </option>
+
+
+                <option value="Tableau">
+
+                    Tableau
+
+                </option>
+
+
+                <option value="Looker Studio">
+
+                    Looker Studio
+
+                </option>
+
+
+                <option value="Google Sheets">
+
+                    Google Sheets
+
+                </option>
+
+
+                <option value="Data Science">
+
+                    Data Science
+
+                </option>
+
+
+                <option value="NumPy">
+
+                    NumPy
+
+                </option>
+
+
+                <option value="Pandas">
+
+                    Pandas
+
+                </option>
+
+
+                <option value="Matplotlib">
+
+                    Matplotlib
+
+                </option>
+
+
+                <option value="Seaborn">
+
+                    Seaborn
+
+                </option>
+
+
+                <option value="Probability">
+
+                    Probability
+
+                </option>
+
+
+                <option value="Big Data">
+
+                    Big Data
+
+                </option>
+
+
+                <option value="Apache Spark">
+
+                    Apache Spark
+
+                </option>
+
+
+                <option value="Hadoop">
+
+                    Hadoop
+
+                </option>
+
+
+                <option value="Kafka">
+
+                    Apache Kafka
+
+                </option>
+
+
+                <option value="Databricks">
+
+                    Databricks
+
+                </option>
+
+
+                <option value="Snowflake">
+
+                    Snowflake
+
+                </option>
+
+
+                <option value="BigQuery">
+
+                    BigQuery
+
+                </option>
+
+
+                <option value="Data Engineering">
+
+                    Data Engineering
+
+                </option>
+
+
+                <option value="ETL">
+
+                    ETL
+
+                </option>
+
+
+                <option value="ELT">
+
+                    ELT
+
+                </option>
+
+
+                <option value="Data Pipelines">
+
+                    Data Pipelines
+
+                </option>
+
+
+                <option value="Data Warehouses">
+
+                    Data Warehouses
+
+                </option>
+
+
+                <option value="Data Lakes">
+
+                    Data Lakes
+
+                </option>
+
+
+                <option value="Airflow">
+
+                    Airflow
+
+                </option>
+
+
+                <option value="dbt">
+
+                    dbt
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 CYBERSECURITY
+            ================================================== -->
+
+            <optgroup label="🔐 Cybersecurity">
+
+
+                <option value="Cybersecurity Fundamentals">
+
+                    Cybersecurity Fundamentals
+
+                </option>
+
+
+                <option value="Networking for Security">
+
+                    Networking for Security
+
+                </option>
+
+
+                <option value="Linux Security">
+
+                    Linux Security
+
+                </option>
+
+
+                <option value="Cryptography">
+
+                    Cryptography
+
+                </option>
+
+
+                <option value="Authentication">
+
+                    Authentication
+
+                </option>
+
+
+                <option value="Access Control">
+
+                    Access Control
+
+                </option>
+
+
+                <option value="Security Principles">
+
+                    Security Principles
+
+                </option>
+
+
+                <option value="Ethical Hacking">
+
+                    Ethical Hacking
+
+                </option>
+
+
+                <option value="SOC Analyst">
+
+                    SOC Analyst
+
+                </option>
+
+
+                <option value="Security Engineer">
+
+                    Security Engineer
+
+                </option>
+
+
+                <option value="Cloud Security">
+
+                    Cloud Security
+
+                </option>
+
+
+                <option value="Application Security">
+
+                    Application Security
+
+                </option>
+
+
+                <option value="Digital Forensics">
+
+                    Digital Forensics
+
+                </option>
+
+
+                <option value="Incident Response">
+
+                    Incident Response
+
+                </option>
+
+
+                <option value="Threat Intelligence">
+
+                    Threat Intelligence
+
+                </option>
+
+
+                <option value="Penetration Testing">
+
+                    Penetration Testing
+
+                </option>
+
+
+                <option value="GRC">
+
+                    GRC
+
+                </option>
+
+
+                <option value="Kali Linux">
+
+                    Kali Linux
+
+                </option>
+
+
+                <option value="Nmap">
+
+                    Nmap
+
+                </option>
+
+
+                <option value="Wireshark">
+
+                    Wireshark
+
+                </option>
+
+
+                <option value="Burp Suite">
+
+                    Burp Suite
+
+                </option>
+
+
+                <option value="OWASP ZAP">
+
+                    OWASP ZAP
+
+                </option>
+
+
+                <option value="Metasploit">
+
+                    Metasploit
+
+                </option>
+
+
+                <option value="Nessus">
+
+                    Nessus
+
+                </option>
+
+
+                <option value="Splunk">
+
+                    Splunk
+
+                </option>
+
+
+                <option value="Wazuh">
+
+                    Wazuh
+
+                </option>
+
+
+                <option value="SIEM">
+
+                    SIEM
+
+                </option>
+
+
+                <option value="Zero Trust">
+
+                    Zero Trust
+
+                </option>
+
+
+                <option value="Identity Security">
+
+                    Identity Security
+
+                </option>
+
+
+                <option value="API Security">
+
+                    API Security
+
+                </option>
+
+
+                <option value="DevSecOps">
+
+                    DevSecOps
+
+                </option>
+
+
+                <option value="AI Security">
+
+                    AI Security
+
+                </option>
+
+
+                <option value="Threat Hunting">
+
+                    Threat Hunting
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 CLOUD
+            ================================================== -->
+
+            <optgroup label="☁️ Cloud Computing">
+
+
+                <option value="AWS">
+
+                    Amazon Web Services
+
+                </option>
+
+
+                <option value="AWS EC2">
+
+                    AWS EC2
+
+                </option>
+
+
+                <option value="AWS S3">
+
+                    AWS S3
+
+                </option>
+
+
+                <option value="AWS Lambda">
+
+                    AWS Lambda
+
+                </option>
+
+
+                <option value="AWS RDS">
+
+                    AWS RDS
+
+                </option>
+
+
+                <option value="AWS IAM">
+
+                    AWS IAM
+
+                </option>
+
+
+                <option value="AWS VPC">
+
+                    AWS VPC
+
+                </option>
+
+
+                <option value="AWS CloudWatch">
+
+                    AWS CloudWatch
+
+                </option>
+
+
+                <option value="Azure">
+
+                    Microsoft Azure
+
+                </option>
+
+
+                <option value="Azure VM">
+
+                    Azure VM
+
+                </option>
+
+
+                <option value="Azure Functions">
+
+                    Azure Functions
+
+                </option>
+
+
+                <option value="Azure Storage">
+
+                    Azure Storage
+
+                </option>
+
+
+                <option value="Azure SQL">
+
+                    Azure SQL
+
+                </option>
+
+
+                <option value="Entra ID">
+
+                    Entra ID
+
+                </option>
+
+
+                <option value="Google Cloud">
+
+                    Google Cloud
+
+                </option>
+
+
+                <option value="Google Compute Engine">
+
+                    Compute Engine
+
+                </option>
+
+
+                <option value="Google Cloud Storage">
+
+                    Cloud Storage
+
+                </option>
+
+
+                <option value="Cloud Run">
+
+                    Cloud Run
+
+                </option>
+
+
+                <option value="Vertex AI">
+
+                    Vertex AI
+
+                </option>
+
+
+                <option value="Cloud Architecture">
+
+                    Cloud Architecture
+
+                </option>
+
+
+                <option value="Cloud Networking">
+
+                    Cloud Networking
+
+                </option>
+
+
+                <option value="Cloud IAM">
+
+                    Cloud IAM
+
+                </option>
+
+
+                <option value="Serverless">
+
+                    Serverless
+
+                </option>
+
+
+                <option value="Containers">
+
+                    Containers
+
+                </option>
+
+
+                <option value="Cloud Databases">
+
+                    Cloud Databases
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 DEVOPS
+            ================================================== -->
+
+            <optgroup label="⚙️ DevOps & SRE">
+
+
+                <option value="DevOps">
+
+                    DevOps
+
+                </option>
+
+
+                <option value="Linux">
+
+                    Linux
+
+                </option>
+
+
+                <option value="Git">
+
+                    Git
+
+                </option>
+
+
+                <option value="GitHub">
+
+                    GitHub
+
+                </option>
+
+
+                <option value="Docker">
+
+                    Docker
+
+                </option>
+
+
+                <option value="Kubernetes">
+
+                    Kubernetes
+
+                </option>
+
+
+                <option value="CI/CD">
+
+                    CI/CD
+
+                </option>
+
+
+                <option value="Jenkins">
+
+                    Jenkins
+
+                </option>
+
+
+                <option value="GitHub Actions">
+
+                    GitHub Actions
+
+                </option>
+
+
+                <option value="GitLab CI">
+
+                    GitLab CI
+
+                </option>
+
+
+                <option value="Terraform">
+
+                    Terraform
+
+                </option>
+
+
+                <option value="Ansible">
+
+                    Ansible
+
+                </option>
+
+
+                <option value="Prometheus">
+
+                    Prometheus
+
+                </option>
+
+
+                <option value="Grafana">
+
+                    Grafana
+
+                </option>
+
+
+                <option value="Infrastructure as Code">
+
+                    Infrastructure as Code
+
+                </option>
+
+
+                <option value="Monitoring">
+
+                    Monitoring
+
+                </option>
+
+
+                <option value="Observability">
+
+                    Observability
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 MOBILE
+            ================================================== -->
+
+            <optgroup label="📱 Mobile Development">
+
+
+                <option value="Android Development">
+
+                    Android Development
+
+                </option>
+
+
+                <option value="Kotlin Android">
+
+                    Kotlin
+
+                </option>
+
+
+                <option value="Android Studio">
+
+                    Android Studio
+
+                </option>
+
+
+                <option value="Jetpack Compose">
+
+                    Jetpack Compose
+
+                </option>
+
+
+                <option value="iOS Development">
+
+                    iOS Development
+
+                </option>
+
+
+                <option value="Swift iOS">
+
+                    Swift
+
+                </option>
+
+
+                <option value="SwiftUI">
+
+                    SwiftUI
+
+                </option>
+
+
+                <option value="Xcode">
+
+                    Xcode
+
+                </option>
+
+
+                <option value="Flutter">
+
+                    Flutter
+
+                </option>
+
+
+                <option value="Dart Mobile">
+
+                    Dart
+
+                </option>
+
+
+                <option value="React Native">
+
+                    React Native
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 UI UX
+            ================================================== -->
+
+            <optgroup label="🎨 UI/UX & Product Design">
+
+
+                <option value="UI Design">
+
+                    UI Design
+
+                </option>
+
+
+                <option value="Figma">
+
+                    Figma
+
+                </option>
+
+
+                <option value="Typography">
+
+                    Typography
+
+                </option>
+
+
+                <option value="Color Theory">
+
+                    Color
+
+                </option>
+
+
+                <option value="Layout Design">
+
+                    Layout
+
+                </option>
+
+
+                <option value="Design Systems">
+
+                    Design Systems
+
+                </option>
+
+
+                <option value="Accessibility">
+
+                    Accessibility
+
+                </option>
+
+
+                <option value="UX Design">
+
+                    UX Design
+
+                </option>
+
+
+                <option value="User Research">
+
+                    User Research
+
+                </option>
+
+
+                <option value="Personas">
+
+                    Personas
+
+                </option>
+
+
+                <option value="User Journeys">
+
+                    User Journeys
+
+                </option>
+
+
+                <option value="Wireframes">
+
+                    Wireframes
+
+                </option>
+
+
+                <option value="Prototyping">
+
+                    Prototyping
+
+                </option>
+
+
+                <option value="Usability Testing">
+
+                    Usability Testing
+
+                </option>
+
+
+                <option value="Information Architecture">
+
+                    Information Architecture
+
+                </option>
+
+
+                <option value="Product Thinking">
+
+                    Product Thinking
+
+                </option>
+
+
+                <option value="Product Strategy">
+
+                    Product Strategy
+
+                </option>
+
+
+                <option value="UX Writing">
+
+                    UX Writing
+
+                </option>
+
+
+                <option value="Product Analytics">
+
+                    Product Analytics
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 CIVIL
+            ================================================== -->
+
+            <optgroup label="🏗️ Civil Engineering">
+
+
+                <option value="Engineering Drawing">
+
+                    Engineering Drawing
+
+                </option>
+
+
+                <option value="Surveying">
+
+                    Surveying
+
+                </option>
+
+
+                <option value="Structural Analysis">
+
+                    Structural Analysis
+
+                </option>
+
+
+                <option value="Construction Materials">
+
+                    Construction Materials
+
+                </option>
+
+
+                <option value="Soil Mechanics">
+
+                    Soil Mechanics
+
+                </option>
+
+
+                <option value="Hydraulics">
+
+                    Hydraulics
+
+                </option>
+
+
+                <option value="Environmental Engineering">
+
+                    Environmental Engineering
+
+                </option>
+
+
+                <option value="Structural Engineering">
+
+                    Structural Engineering
+
+                </option>
+
+
+                <option value="Geotechnical Engineering">
+
+                    Geotechnical Engineering
+
+                </option>
+
+
+                <option value="Transportation Engineering">
+
+                    Transportation Engineering
+
+                </option>
+
+
+                <option value="Construction Engineering">
+
+                    Construction Engineering
+
+                </option>
+
+
+                <option value="Water Resources">
+
+                    Water Resources
+
+                </option>
+
+
+                <option value="Urban Infrastructure">
+
+                    Urban Infrastructure
+
+                </option>
+
+
+                <option value="AutoCAD Civil">
+
+                    AutoCAD
+
+                </option>
+
+
+                <option value="Civil 3D">
+
+                    Civil 3D
+
+                </option>
+
+
+                <option value="Revit Civil">
+
+                    Revit
+
+                </option>
+
+
+                <option value="STAAD.Pro">
+
+                    STAAD.Pro
+
+                </option>
+
+
+                <option value="ETABS">
+
+                    ETABS
+
+                </option>
+
+
+                <option value="SAFE">
+
+                    SAFE
+
+                </option>
+
+
+                <option value="Primavera">
+
+                    Primavera
+
+                </option>
+
+
+                <option value="BIM">
+
+                    BIM
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 MECHANICAL
+            ================================================== -->
+
+            <optgroup label="⚙️ Mechanical Engineering">
+
+
+                <option value="Engineering Mechanics">
+
+                    Engineering Mechanics
+
+                </option>
+
+
+                <option value="Thermodynamics">
+
+                    Thermodynamics
+
+                </option>
+
+
+                <option value="Fluid Mechanics">
+
+                    Fluid Mechanics
+
+                </option>
+
+
+                <option value="Heat Transfer">
+
+                    Heat Transfer
+
+                </option>
+
+
+                <option value="Manufacturing">
+
+                    Manufacturing
+
+                </option>
+
+
+                <option value="Machine Design">
+
+                    Machine Design
+
+                </option>
+
+
+                <option value="Engineering Materials">
+
+                    Materials
+
+                </option>
+
+
+                <option value="Automotive Engineering">
+
+                    Automotive Engineering
+
+                </option>
+
+
+                <option value="CAD CAM">
+
+                    CAD/CAM
+
+                </option>
+
+
+                <option value="Mechatronics">
+
+                    Mechatronics
+
+                </option>
+
+
+                <option value="Aerospace">
+
+                    Aerospace
+
+                </option>
+
+
+                <option value="Thermal Engineering">
+
+                    Thermal Engineering
+
+                </option>
+
+
+                <option value="SolidWorks">
+
+                    SolidWorks
+
+                </option>
+
+
+                <option value="CATIA">
+
+                    CATIA
+
+                </option>
+
+
+                <option value="Creo">
+
+                    Creo
+
+                </option>
+
+
+                <option value="ANSYS">
+
+                    ANSYS
+
+                </option>
+
+
+                <option value="MATLAB Mechanical">
+
+                    MATLAB
+
+                </option>
+
+
+                <option value="Fusion 360">
+
+                    Fusion 360
+
+                </option>
+
+
+                <option value="Siemens NX">
+
+                    Siemens NX
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 ELECTRICAL
+            ================================================== -->
+
+            <optgroup label="⚡ Electrical Engineering">
+
+
+                <option value="Circuit Theory">
+
+                    Circuit Theory
+
+                </option>
+
+
+                <option value="Electrical Machines">
+
+                    Electrical Machines
+
+                </option>
+
+
+                <option value="Power Systems">
+
+                    Power Systems
+
+                </option>
+
+
+                <option value="Control Systems">
+
+                    Control Systems
+
+                </option>
+
+
+                <option value="Signals">
+
+                    Signals
+
+                </option>
+
+
+                <option value="Renewable Energy">
+
+                    Renewable Energy
+
+                </option>
+
+
+                <option value="Power Electronics">
+
+                    Power Electronics
+
+                </option>
+
+
+                <option value="Automation">
+
+                    Automation
+
+                </option>
+
+
+                <option value="Control Engineering">
+
+                    Control Engineering
+
+                </option>
+
+
+                <option value="MATLAB Electrical">
+
+                    MATLAB
+
+                </option>
+
+
+                <option value="Simulink">
+
+                    Simulink
+
+                </option>
+
+
+                <option value="ETAP">
+
+                    ETAP
+
+                </option>
+
+
+                <option value="PSCAD">
+
+                    PSCAD
+
+                </option>
+
+
+                <option value="PLC">
+
+                    PLC
+
+                </option>
+
+
+                <option value="SCADA">
+
+                    SCADA
+
+                </option>
+
+
+                <option value="AutoCAD Electrical">
+
+                    AutoCAD Electrical
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 ELECTRONICS
+            ================================================== -->
+
+            <optgroup label="🔌 Electronics & Communication">
+
+
+                <option value="Analog Electronics">
+
+                    Analog Electronics
+
+                </option>
+
+
+                <option value="Digital Electronics">
+
+                    Digital Electronics
+
+                </option>
+
+
+                <option value="Microprocessors">
+
+                    Microprocessors
+
+                </option>
+
+
+                <option value="Microcontrollers">
+
+                    Microcontrollers
+
+                </option>
+
+
+                <option value="Communication Systems">
+
+                    Communication Systems
+
+                </option>
+
+
+                <option value="Arduino">
+
+                    Arduino
+
+                </option>
+
+
+                <option value="ESP32">
+
+                    ESP32
+
+                </option>
+
+
+                <option value="STM32">
+
+                    STM32
+
+                </option>
+
+
+                <option value="Raspberry Pi">
+
+                    Raspberry Pi
+
+                </option>
+
+
+                <option value="Verilog">
+
+                    Verilog
+
+                </option>
+
+
+                <option value="VHDL">
+
+                    VHDL
+
+                </option>
+
+
+                <option value="FPGA">
+
+                    FPGA
+
+                </option>
+
+
+                <option value="Digital Design">
+
+                    Digital Design
+
+                </option>
+
+
+                <option value="ASIC">
+
+                    ASIC
+
+                </option>
+
+
+                <option value="KiCad">
+
+                    KiCad
+
+                </option>
+
+
+                <option value="Altium">
+
+                    Altium
+
+                </option>
+
+
+                <option value="Eagle PCB">
+
+                    Eagle
+
+                </option>
+
+
+                <option value="IoT">
+
+                    IoT
+
+                </option>
+
+
+                <option value="Edge Computing">
+
+                    Edge Computing
+
+                </option>
+
+
+                <option value="Embedded AI">
+
+                    Embedded AI
+
+                </option>
+
+
+                <option value="Semiconductor Technology">
+
+                    Semiconductor Technology
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 ARCHITECTURE
+            ================================================== -->
+
+            <optgroup label="🏛️ Architecture">
+
+
+                <option value="Architectural Design">
+
+                    Architectural Design
+
+                </option>
+
+
+                <option value="Building Planning">
+
+                    Building Planning
+
+                </option>
+
+
+                <option value="Architecture Construction">
+
+                    Construction
+
+                </option>
+
+
+                <option value="Structural Concepts">
+
+                    Structural Concepts
+
+                </option>
+
+
+                <option value="Sustainable Design">
+
+                    Sustainable Design
+
+                </option>
+
+
+                <option value="AutoCAD Architecture">
+
+                    AutoCAD
+
+                </option>
+
+
+                <option value="Revit Architecture">
+
+                    Revit
+
+                </option>
+
+
+                <option value="BIM Architecture">
+
+                    BIM
+
+                </option>
+
+
+                <option value="SketchUp">
+
+                    SketchUp
+
+                </option>
+
+
+                <option value="Rhino">
+
+                    Rhino
+
+                </option>
+
+
+                <option value="Grasshopper">
+
+                    Grasshopper
+
+                </option>
+
+
+                <option value="Lumion">
+
+                    Lumion
+
+                </option>
+
+
+                <option value="Enscape">
+
+                    Enscape
+
+                </option>
+
+
+                <option value="V-Ray">
+
+                    V-Ray
+
+                </option>
+
+
+                <option value="Blender Architecture">
+
+                    Blender
+
+                </option>
+
+
+                <option value="3ds Max Architecture">
+
+                    3ds Max
+
+                </option>
+
+
+                <option value="Parametric Design">
+
+                    Parametric Design
+
+                </option>
+
+
+                <option value="Computational Design">
+
+                    Computational Design
+
+                </option>
+
+
+                <option value="Generative Design">
+
+                    Generative Design
+
+                </option>
+
+
+                <option value="Digital Twins Architecture">
+
+                    Digital Twins
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 ROBOTICS
+            ================================================== -->
+
+            <optgroup label="🤖 Robotics & Automation">
+
+
+                <option value="Robotics">
+
+                    Robotics
+
+                </option>
+
+
+                <option value="Sensors">
+
+                    Sensors
+
+                </option>
+
+
+                <option value="Motors">
+
+                    Motors
+
+                </option>
+
+
+                <option value="Robotics Control Systems">
+
+                    Control Systems
+
+                </option>
+
+
+                <option value="Computer Vision Robotics">
+
+                    Computer Vision
+
+                </option>
+
+
+                <option value="ROS">
+
+                    ROS
+
+                </option>
+
+
+                <option value="ROS2">
+
+                    ROS2
+
+                </option>
+
+
+                <option value="Embedded Systems">
+
+                    Embedded Systems
+
+                </option>
+
+
+                <option value="NVIDIA Jetson">
+
+                    NVIDIA Jetson
+
+                </option>
+
+
+                <option value="OpenCV">
+
+                    OpenCV
+
+                </option>
+
+
+                <option value="Gazebo">
+
+                    Gazebo
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 BIOTECH
+            ================================================== -->
+
+            <optgroup label="🧬 Biotechnology & Life Sciences">
+
+
+                <option value="Molecular Biology">
+
+                    Molecular Biology
+
+                </option>
+
+
+                <option value="Genetics">
+
+                    Genetics
+
+                </option>
+
+
+                <option value="Bioinformatics">
+
+                    Bioinformatics
+
+                </option>
+
+
+                <option value="Biostatistics">
+
+                    Biostatistics
+
+                </option>
+
+
+                <option value="Computational Biology">
+
+                    Computational Biology
+
+                </option>
+
+
+                <option value="Python Biotechnology">
+
+                    Python
+
+                </option>
+
+
+                <option value="R Biotechnology">
+
+                    R
+
+                </option>
+
+
+                <option value="BLAST">
+
+                    BLAST
+
+                </option>
+
+
+                <option value="Bioconductor">
+
+                    Bioconductor
+
+                </option>
+
+
+                <option value="Galaxy">
+
+                    Galaxy
+
+                </option>
+
+
+                <option value="AI for Healthcare">
+
+                    AI for Healthcare
+
+                </option>
+
+
+                <option value="Genomics">
+
+                    Genomics
+
+                </option>
+
+
+                <option value="Drug Discovery">
+
+                    Drug Discovery
+
+                </option>
+
+
+                <option value="Biomedical Data Science">
+
+                    Biomedical Data Science
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 BUSINESS
+            ================================================== -->
+
+            <optgroup label="💼 Business & Management">
+
+
+                <option value="Business Analytics">
+
+                    Business Analytics
+
+                </option>
+
+
+                <option value="Business Analyst">
+
+                    Business Analyst
+
+                </option>
+
+
+                <option value="Requirements Gathering">
+
+                    Requirements Gathering
+
+                </option>
+
+
+                <option value="Process Mapping">
+
+                    Process Mapping
+
+                </option>
+
+
+                <option value="Documentation">
+
+                    Documentation
+
+                </option>
+
+
+                <option value="Agile">
+
+                    Agile
+
+                </option>
+
+
+                <option value="Scrum">
+
+                    Scrum
+
+                </option>
+
+
+                <option value="Jira">
+
+                    Jira
+
+                </option>
+
+
+                <option value="Stakeholder Management">
+
+                    Stakeholder Management
+
+                </option>
+
+
+                <option value="Project Management">
+
+                    Project Management
+
+                </option>
+
+
+                <option value="Product Management">
+
+                    Product Management
+
+                </option>
+
+
+                <option value="Operations">
+
+                    Operations
+
+                </option>
+
+
+                <option value="Business Strategy">
+
+                    Strategy
+
+                </option>
+
+
+                <option value="Leadership">
+
+                    Leadership
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 FINANCE
+            ================================================== -->
+
+            <optgroup label="📈 Finance & Accounting">
+
+
+                <option value="Accounting">
+
+                    Accounting
+
+                </option>
+
+
+                <option value="Financial Analysis">
+
+                    Financial Analysis
+
+                </option>
+
+
+                <option value="Financial Modeling">
+
+                    Financial Modeling
+
+                </option>
+
+
+                <option value="Investment">
+
+                    Investment
+
+                </option>
+
+
+                <option value="Risk Management">
+
+                    Risk Management
+
+                </option>
+
+
+                <option value="Budgeting">
+
+                    Budgeting
+
+                </option>
+
+
+                <option value="Excel Finance">
+
+                    Excel
+
+                </option>
+
+
+                <option value="Power BI Finance">
+
+                    Power BI
+
+                </option>
+
+
+                <option value="SQL Finance">
+
+                    SQL
+
+                </option>
+
+
+                <option value="Python Finance">
+
+                    Python
+
+                </option>
+
+
+                <option value="FinTech">
+
+                    FinTech
+
+                </option>
+
+
+                <option value="Blockchain">
+
+                    Blockchain
+
+                </option>
+
+
+                <option value="Digital Payments">
+
+                    Digital Payments
+
+                </option>
+
+
+                <option value="AI in Finance">
+
+                    AI in Finance
+
+                </option>
+
+
+                <option value="Financial Data Analytics">
+
+                    Financial Data Analytics
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 HR
+            ================================================== -->
+
+            <optgroup label="👥 HR & People">
+
+
+                <option value="Recruitment">
+
+                    Recruitment
+
+                </option>
+
+
+                <option value="Talent Acquisition">
+
+                    Talent Acquisition
+
+                </option>
+
+
+                <option value="Performance Management">
+
+                    Performance Management
+
+                </option>
+
+
+                <option value="Employee Engagement">
+
+                    Employee Engagement
+
+                </option>
+
+
+                <option value="Payroll">
+
+                    Payroll
+
+                </option>
+
+
+                <option value="HR Operations">
+
+                    HR Operations
+
+                </option>
+
+
+                <option value="HR Analytics">
+
+                    HR Analytics
+
+                </option>
+
+
+                <option value="HRIS">
+
+                    HRIS
+
+                </option>
+
+
+                <option value="People Analytics">
+
+                    People Analytics
+
+                </option>
+
+
+                <option value="AI Recruitment">
+
+                    AI Recruitment
+
+                </option>
+
+
+                <option value="Workforce Analytics">
+
+                    Workforce Analytics
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 MARKETING
+            ================================================== -->
+
+            <optgroup label="📣 Marketing">
+
+
+                <option value="Digital Marketing">
+
+                    Digital Marketing
+
+                </option>
+
+
+                <option value="SEO">
+
+                    SEO
+
+                </option>
+
+
+                <option value="SEM">
+
+                    SEM
+
+                </option>
+
+
+                <option value="Social Media Marketing">
+
+                    Social Media
+
+                </option>
+
+
+                <option value="Email Marketing">
+
+                    Email Marketing
+
+                </option>
+
+
+                <option value="Content Marketing">
+
+                    Content Marketing
+
+                </option>
+
+
+                <option value="Affiliate Marketing">
+
+                    Affiliate Marketing
+
+                </option>
+
+
+                <option value="Performance Marketing">
+
+                    Performance Marketing
+
+                </option>
+
+
+                <option value="Google Analytics">
+
+                    Google Analytics
+
+                </option>
+
+
+                <option value="Search Console">
+
+                    Search Console
+
+                </option>
+
+
+                <option value="Meta Ads">
+
+                    Meta Ads
+
+                </option>
+
+
+                <option value="Google Ads">
+
+                    Google Ads
+
+                </option>
+
+
+                <option value="Marketing Dashboards">
+
+                    Marketing Dashboards
+
+                </option>
+
+
+                <option value="AI Content">
+
+                    AI Content
+
+                </option>
+
+
+                <option value="AI Marketing Research">
+
+                    AI Research
+
+                </option>
+
+
+                <option value="Marketing Automation">
+
+                    Marketing Automation
+
+                </option>
+
+
+                <option value="Personalization">
+
+                    Personalization
+
+                </option>
+
+
+                <option value="AI-assisted Advertising">
+
+                    AI-assisted Advertising
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 CREATOR
+            ================================================== -->
+
+            <optgroup label="🎬 Creator & Digital Skills">
+
+
+                <option value="Content Creation">
+
+                    Content Creation
+
+                </option>
+
+
+                <option value="YouTube">
+
+                    YouTube
+
+                </option>
+
+
+                <option value="Instagram">
+
+                    Instagram
+
+                </option>
+
+
+                <option value="LinkedIn Creator">
+
+                    LinkedIn
+
+                </option>
+
+
+                <option value="Blogging">
+
+                    Blogging
+
+                </option>
+
+
+                <option value="Copywriting">
+
+                    Copywriting
+
+                </option>
+
+
+                <option value="Scriptwriting">
+
+                    Scriptwriting
+
+                </option>
+
+
+                <option value="Storytelling">
+
+                    Storytelling
+
+                </option>
+
+
+                <option value="Video Editing">
+
+                    Video Editing
+
+                </option>
+
+
+                <option value="DaVinci Resolve">
+
+                    DaVinci Resolve
+
+                </option>
+
+
+                <option value="Premiere Pro">
+
+                    Premiere Pro
+
+                </option>
+
+
+                <option value="CapCut">
+
+                    CapCut
+
+                </option>
+
+
+                <option value="After Effects">
+
+                    After Effects
+
+                </option>
+
+
+                <option value="Graphic Design">
+
+                    Graphic Design
+
+                </option>
+
+
+                <option value="Canva">
+
+                    Canva
+
+                </option>
+
+
+                <option value="Photoshop">
+
+                    Photoshop
+
+                </option>
+
+
+                <option value="Illustrator">
+
+                    Illustrator
+
+                </option>
+
+
+                <option value="3D Design">
+
+                    3D Design
+
+                </option>
+
+
+                <option value="Animation">
+
+                    Animation
+
+                </option>
+
+
+                <option value="Maya">
+
+                    Maya
+
+                </option>
+
+
+                <option value="Unreal Engine">
+
+                    Unreal Engine
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 FREELANCING
+            ================================================== -->
+
+            <optgroup label="💻 Freelancing">
+
+
+                <option value="Freelancing">
+
+                    Freelancing
+
+                </option>
+
+
+                <option value="Getting Started Freelancing">
+
+                    Getting Started
+
+                </option>
+
+
+                <option value="Finding Clients">
+
+                    Finding Clients
+
+                </option>
+
+
+                <option value="Proposal Writing">
+
+                    Proposal Writing
+
+                </option>
+
+
+                <option value="Freelance Pricing">
+
+                    Pricing
+
+                </option>
+
+
+                <option value="Negotiation">
+
+                    Negotiation
+
+                </option>
+
+
+                <option value="Client Communication">
+
+                    Client Communication
+
+                </option>
+
+
+                <option value="Portfolio Building">
+
+                    Portfolio Building
+
+                </option>
+
+
+                <option value="Personal Branding">
+
+                    Personal Branding
+
+                </option>
+
+
+                <option value="Freelance Contracts">
+
+                    Contracts
+
+                </option>
+
+
+                <option value="Invoicing">
+
+                    Invoicing
+
+                </option>
+
+
+                <option value="Freelance Project Management">
+
+                    Project Management
+
+                </option>
+
+
+                <option value="Freelance Web Development">
+
+                    Freelance Web Development
+
+                </option>
+
+
+                <option value="WordPress">
+
+                    WordPress
+
+                </option>
+
+
+                <option value="Shopify">
+
+                    Shopify
+
+                </option>
+
+
+                <option value="Freelance SEO">
+
+                    SEO
+
+                </option>
+
+
+                <option value="Hosting">
+
+                    Hosting
+
+                </option>
+
+
+                <option value="APIs Freelancing">
+
+                    APIs
+
+                </option>
+
+
+                <option value="AI Freelancing">
+
+                    AI Freelancing
+
+                </option>
+
+
+                <option value="AI Automation">
+
+                    AI Automation
+
+                </option>
+
+
+                <option value="Chatbots">
+
+                    Chatbots
+
+                </option>
+
+
+                <option value="AI Agents Freelancing">
+
+                    AI Agents
+
+                </option>
+
+
+                <option value="AI APIs Freelancing">
+
+                    AI APIs
+
+                </option>
+
+
+                <option value="Workflow Automation">
+
+                    Workflow Automation
+
+                </option>
+
+
+                <option value="AI Integration">
+
+                    AI Integration
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 PROFESSIONAL / FUTURE
+            ================================================== -->
+
+            <optgroup label="🌱 Professional & Future Skills">
+
+
+                <option value="Communication">
+
+                    Communication
+
+                </option>
+
+
+                <option value="English">
+
+                    English
+
+                </option>
+
+
+                <option value="Critical Thinking">
+
+                    Critical Thinking
+
+                </option>
+
+
+                <option value="Problem Solving">
+
+                    Problem Solving
+
+                </option>
+
+
+                <option value="Creativity">
+
+                    Creativity
+
+                </option>
+
+
+                <option value="Collaboration">
+
+                    Collaboration
+
+                </option>
+
+
+                <option value="Time Management">
+
+                    Time Management
+
+                </option>
+
+
+                <option value="Presentation">
+
+                    Presentation
+
+                </option>
+
+
+                <option value="Leadership Skills">
+
+                    Leadership
+
+                </option>
+
+
+                <option value="Adaptability">
+
+                    Adaptability
+
+                </option>
+
+
+                <option value="Resume">
+
+                    Resume
+
+                </option>
+
+
+                <option value="LinkedIn">
+
+                    LinkedIn
+
+                </option>
+
+
+                <option value="Portfolio">
+
+                    Portfolio
+
+                </option>
+
+
+                <option value="Networking Career">
+
+                    Networking
+
+                </option>
+
+
+                <option value="Interview Skills">
+
+                    Interview Skills
+
+                </option>
+
+
+                <option value="Personal Branding Career">
+
+                    Personal Branding
+
+                </option>
+
+
+                <option value="AI Tools">
+
+                    AI Tools
+
+                </option>
+
+
+                <option value="Prompting">
+
+                    Prompting
+
+                </option>
+
+
+                <option value="AI Research">
+
+                    AI Research
+
+                </option>
+
+
+                <option value="AI Productivity">
+
+                    AI Productivity
+
+                </option>
+
+
+                <option value="AI Verification">
+
+                    AI Verification
+
+                </option>
+
+
+                <option value="AI Ethics">
+
+                    AI Ethics
+
+                </option>
+
+
+            </optgroup>
+
+
+
+            <!-- =================================================
+                 TRENDING
+            ================================================== -->
+
+            <optgroup label="🔥 Trending Technologies">
+
+
+                <option value="Trending Generative AI">
+
+                    Generative AI
+
+                </option>
+
+
+                <option value="Trending AI Agents">
+
+                    AI Agents
+
+                </option>
+
+
+                <option value="Trending LLMs">
+
+                    LLMs
+
+                </option>
+
+
+                <option value="Trending RAG">
+
+                    RAG
+
+                </option>
+
+
+                <option value="Trending Computer Vision">
+
+                    Computer Vision
+
+                </option>
+
+
+                <option value="Trending Data Engineering">
+
+                    Data Engineering
+
+                </option>
+
+
+                <option value="Trending Cybersecurity">
+
+                    Cybersecurity
+
+                </option>
+
+
+                <option value="Trending Cloud Computing">
+
+                    Cloud Computing
+
+                </option>
+
+
+                <option value="Trending DevSecOps">
+
+                    DevSecOps
+
+                </option>
+
+
+                <option value="Trending Kubernetes">
+
+                    Kubernetes
+
+                </option>
+
+
+                <option value="Trending Cloud Security">
+
+                    Cloud Security
+
+                </option>
+
+
+                <option value="Trending Robotics">
+
+                    Robotics
+
+                </option>
+
+
+                <option value="Trending IoT">
+
+                    IoT
+
+                </option>
+
+
+                <option value="Trending Edge AI">
+
+                    Edge AI
+
+                </option>
+
+
+                <option value="Trending Digital Twins">
+
+                    Digital Twins
+
+                </option>
+
+
+                <option value="Trending Blockchain">
+
+                    Blockchain
+
+                </option>
+
+
+                <option value="Trending AR VR">
+
+                    AR / VR
+
+                </option>
+
+
+                <option value="Quantum Computing">
+
+                    Quantum Computing
+
+                </option>
+
+
+            </optgroup>
+
+
+        </select>
+
+
+
+        <!-- =================================================
+             INTERVIEW LEVEL
+        ================================================== -->
+
+        <label for="levelSelect">
+
+            Interview Level
+
+        </label>
+
+
+        <select id="levelSelect">
+
+
+            <option value="Beginner">
+
+                Beginner
+
+            </option>
+
+
+            <option value="Intermediate">
+
+                Intermediate
+
+            </option>
+
+
+            <option value="Advanced">
+
+                Advanced
+
+            </option>
+
+
+        </select>
+
+
+
+        <!-- =================================================
+             PERMISSIONS
+        ================================================== -->
+
+        <div class="setup-permissions">
+
+
+            <div>
+
+                📷 Camera
+
+            </div>
+
+
+            <div>
+
+                🎤 Microphone
+
+            </div>
+
+
+            <div>
+
+                🖥️ Screen Share
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- ENABLE MEDIA -->
+
+        <button
+            type="button"
+            id="enableMediaBtn"
+            class="enable-media-btn"
+        >
+
+            Enable Camera, Microphone & Screen
+
+        </button>
+
+
+
+        <!-- START INTERVIEW -->
+
+        <button
+            type="button"
+            id="startInterviewBtn"
+            class="start-interview-btn"
+            disabled
+        >
+
+            Start AI Interview →
+
+        </button>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     RESULT SCREEN
+===================================================== -->
+
+<div
+    id="resultScreen"
+    class="result-screen hidden"
+>
+
+
+    <div class="result-card">
+
+
+        <div class="result-icon">
+
+            🎯
+
+        </div>
+
+
+        <h2>
+
+            Interview Complete
+
+        </h2>
+
+
+        <p id="resultSummary">
+
+            Your interview has been completed.
+
+        </p>
+
+
+
+        <!-- PROCTORING SUMMARY -->
+
+        <div class="result-warning-box">
+
+
+            <strong>
+
+                Proctoring Summary
+
+            </strong>
+
+
+            <p>
+
+                Red flags detected:
+
+                <span id="finalWarningCount">
+
+                    0
+
+                </span>
+
+            </p>
+
+
+        </div>
+
+
+
+        <!-- AI FEEDBACK -->
+
+        <div
+            id="feedbackContainer"
+        ></div>
+
+
+
+        <!-- RESTART -->
+
+        <button
+            type="button"
+            id="restartInterviewBtn"
+            class="restart-interview-btn"
+        >
+
+            Start Another Interview
+
+        </button>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script
+    src="{{ url_for('part4.static', filename='interview.js') }}"
+></script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AI Assistant | Skill Up AI</title>
+
+
+    <!-- =====================================================
+         MAIN CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('part4.static', filename='part4.css') }}"
+    >
+
+
+    <!-- =====================================================
+         AI ASSISTANT LOGO FIX
+         Scoped only to this page
+    ====================================================== -->
+
+    <style>
+
+        .part4-page .part4-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .part4-page .part4-brand img {
+            width: 170px;
+            height: auto;
+            max-height: none;
+            object-fit: contain;
+            display: block;
+        }
+
+        .part4-page .part4-brand .assistant-label {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .part4-page .part4-brand .assistant-label strong {
+            font-size: 14px;
+            font-weight: 700;
+            color: #26233a;
+        }
+
+        .part4-page .part4-brand .assistant-label span {
+            margin-top: 3px;
+            font-size: 11px;
+            color: #928da1;
+        }
+
+        @media (max-width: 650px) {
+
+            .part4-page .part4-brand img {
+                width: 140px;
+            }
+
+            .part4-page .part4-brand .assistant-label {
+                display: none;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="part4-page">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="part4-header">
+
+
+        <!-- COMPLETE SKILL UP AI LOGO -->
+
+        <div class="part4-brand">
+
+            <img
+                src="{{ url_for('part4.static', filename='logo.png') }}"
+                alt="Skill Up AI"
+            >
+
+
+            <!-- Only assistant label.
+                 No duplicate Skill Up AI text. -->
+
+            <div class="assistant-label">
+
+                <strong>
+                    AI Learning Assistant
+                </strong>
+
+                <span>
+                    Learn with Skill Up AI
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- DASHBOARD -->
+
+        <a
+            href="/"
+            class="back-link"
+        >
+
+            ← Dashboard
+
+        </a>
+
+
+    </header>
+
+
+
+    <!-- =====================================================
+         MAIN AI ASSISTANT
+    ====================================================== -->
+
+    <main class="ai-wrapper">
+
+
+        <!-- =================================================
+             HEADING
+        ================================================== -->
+
+        <section class="ai-heading">
+
+
+            <small>
+                SKILL UP AI
+            </small>
+
+
+            <h1>
+                AI Learning Assistant
+            </h1>
+
+
+            <p>
+                Ask questions and learn in simple language.
+            </p>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             CHAT CARD
+        ================================================== -->
+
+        <section class="ai-chat-card">
+
+
+            <!-- CHAT MESSAGES -->
+
+            <div
+                id="chatMessages"
+                class="chat-messages"
+            >
+
+
+                <!-- INITIAL AI MESSAGE -->
+
+                <div class="chat-row assistant">
+
+
+                    <div class="chat-avatar">
+
+                        S
+
+                    </div>
+
+
+                    <div class="chat-bubble">
+
+                        Hi! 👋 I'm your Skill Up AI tutor.
+
+                        <br><br>
+
+                        Tell me what you're learning or
+                        what you don't understand.
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 QUICK ACTIONS
+            ================================================== -->
+
+            <div class="quick-actions">
+
+
+                <button
+                    type="button"
+                    onclick="quickAsk('What is networking?')"
+                >
+
+                    What is networking?
+
+                </button>
+
+
+                <button
+                    type="button"
+                    onclick="quickAsk('Why do we use INNER JOIN?')"
+                >
+
+                    Why INNER JOIN?
+
+                </button>
+
+
+                <button
+                    type="button"
+                    onclick="quickAsk('Give me a real-world example.')"
+                >
+
+                    Give me an example
+
+                </button>
+
+
+                <button
+                    type="button"
+                    onclick="quickAsk('Help me understand this Python error.')"
+                >
+
+                    Coding help
+
+                </button>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 INPUT
+            ================================================== -->
+
+            <div class="ai-input-row">
+
+
+                <input
+                    id="messageInput"
+                    type="text"
+                    placeholder="Ask Skill Up AI anything..."
+                    autocomplete="off"
+                >
+
+
+                <button
+                    id="sendButton"
+                    type="button"
+                    onclick="sendMessage()"
+                >
+
+                    Send
+
+                </button>
+
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     AI ASSISTANT JAVASCRIPT
+====================================================== -->
+
+<script
+    src="{{ url_for('part4.static', filename='ai.js') }}"
+></script>
+
+
+</body>
+
+</html>
