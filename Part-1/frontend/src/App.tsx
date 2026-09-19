@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 
-const API = 'http://localhost:8000';
+const API = 'https://skillup-ai-cekh.onrender.com';
 
 type User = {
   id: number;
